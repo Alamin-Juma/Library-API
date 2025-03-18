@@ -3,14 +3,12 @@ const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
   class Book extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
-      // Define many-to-many association with Authors
+      // Many-to-Many Relationship with Authors
       Book.belongsToMany(models.Author, { through: "BookAuthors", foreignKey: "bookId" });
+
+      // One-to-Many Relationship with BorrowRecord
+      Book.hasMany(models.BorrowRecord, { foreignKey: "bookId", onDelete: "CASCADE" });
     }
   }
 
@@ -21,11 +19,11 @@ module.exports = (sequelize, DataTypes) => {
       publicationYear: DataTypes.INTEGER,
       image: DataTypes.STRING,
       rating: DataTypes.FLOAT,
-      copies: DataTypes.INTEGER,
+      copies: DataTypes.INTEGER
     },
     {
       sequelize,
-      modelName: "Book",
+      modelName: "Book"
     }
   );
 

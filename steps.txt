@@ -309,3 +309,86 @@ Run this command to generate the BookAuthors model:
 npx sequelize-cli model:generate --name BookAuthors --attributes bookId:integer,authorId:integer
 
 npx sequelize-cli db:migrate
+
+
+📘 Books Management
+Action	Method	Endpoint	Payload (Example)
+Get all books	GET	/api/books?page=1&limit=5	-
+Get a book	GET	/api/books/1	-
+Add a book	POST	/api/books	{ "title": "New Book", "isbn": "123456789", "publicationYear": 2024, "image": "url.jpg", "rating": 4.5, "copies": 10, "authors": "John Doe" }
+Update a book	PUT	/api/books/1	{ "title": "Updated Title" }
+Delete a book	DELETE	/api/books/1	-
+
+📚 Borrowing and Returning
+Action	Method	Endpoint	Payload (Example)
+Borrow a book	POST	/api/books/1/borrow	{ "userId": 1 }
+Return a book	POST	/api/books/1/return	{ "userId": 1 }
+
+📊 Reports
+Action	Method	Endpoint	Description
+Overdue Books	GET	/api/reports/overdue	Lists overdue books with user details
+
+
+Step 1: Generate the BorrowRecord Model
+Run the following command inside your project directory:
+npx sequelize-cli model:generate --name BorrowRecord --attributes bookId:integer,userId:integer,borrowedAt:date,returnedAt:date
+
+
+4️⃣ Recreate Migrations & Seed Again
+Since the previous migration likely failed due to the incorrect model association, we need to reset the database and re-run migrations.
+
+Run these commands:
+
+# Reset the database (DANGER: This deletes all data!)
+npx sequelize-cli db:drop
+npx sequelize-cli db:create
+
+# Run migrations again
+npx sequelize-cli db:migrate
+
+# Seed data
+npx sequelize-cli db:seed:all
+
+
+//lets say you need to add a column to an already created table on migratiions  
+🔹 Solution: Run a New Migration to Add dueDate
+Even though dueDate exists in your model definition, the actual database schema might not have been updated. You need to create a migration to ensure that column is present.
+
+1️⃣ Generate a Migration to Add dueDate Column
+Run the following command:
+npx sequelize-cli migration:generate --name add-dueDate-to-borrowRecords
+
+✅ This will create a migration file inside src/migrations/.
+2️⃣ Edit the Migration File
+Inside the generated file (src/migrations/YYYYMMDDHHMMSS-add-dueDate-to-borrowRecords.js), update it like this:
+
+"use strict";
+
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.addColumn("BorrowRecords", "dueDate", {
+      type: Sequelize.DATE,
+      allowNull: false,
+      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP + INTERVAL '14 days'"), // Default due date 14 days later
+    });
+  },
+
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.removeColumn("BorrowRecords", "dueDate");
+  },
+};
+
+
+3️⃣ Run the Migration
+After updating the migration file, run:
+npx sequelize-cli db:migrate
+
+
+
+🔹 Next Steps: Implement Users Management
+To complete the assignment, you now need to:
+
+1️⃣ Generate the User Model
+Run the following command to create the User model:
+
+npx sequelize-cli model:generate --name User --attributes name:string,email:string
