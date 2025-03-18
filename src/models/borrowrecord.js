@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
       BorrowRecord.belongsTo(models.Book, { foreignKey: "bookId", onDelete: "CASCADE" });
 
       // Associate BorrowRecord with User (if User model exists)
-      // BorrowRecord.belongsTo(models.User, { foreignKey: "userId", onDelete: "CASCADE" });
+      BorrowRecord.belongsTo(models.User, { foreignKey: "userId", onDelete: "CASCADE" });
     }
   }
 

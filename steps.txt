@@ -392,3 +392,162 @@ To complete the assignment, you now need to:
 Run the following command to create the User model:
 
 npx sequelize-cli model:generate --name User --attributes name:string,email:string
+
+This will create:
+
+models/user.js (for defining the User model)
+migrations/*-create-user.js (for creating the users table)
+
+2️⃣ Define User Model Associations
+Modify models/user.js to include associations:
+"use strict";
+const { Model } = require("sequelize");
+
+module.exports = (sequelize, DataTypes) => {
+  class User extends Model {
+    static associate(models) {
+      // A User can borrow multiple books (One-to-Many)
+      User.hasMany(models.BorrowRecord, { foreignKey: "userId", onDelete: "CASCADE" });
+    }
+  }
+
+  User.init(
+    {
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+    },
+    {
+      sequelize,
+      modelName: "User",
+    }
+  );
+
+  return User;
+};
+
+
+
+3️⃣ Update BorrowRecord Model to Include Users
+Since users borrow books, update models/borrowrecord.js:
+"use strict";
+const { Model } = require("sequelize");
+
+module.exports = (sequelize, DataTypes) => {
+  class BorrowRecord extends Model {
+    static associate(models) {
+      BorrowRecord.belongsTo(models.Book, { foreignKey: "bookId", onDelete: "CASCADE" });
+      BorrowRecord.belongsTo(models.User, { foreignKey: "userId", onDelete: "CASCADE" });
+    }
+  }
+
+  BorrowRecord.init(
+    {
+      bookId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Books",
+          key: "id",
+        },
+      },
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Users",
+          key: "id",
+        },
+      },
+      borrowedAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+      dueDate: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
+      returnedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+    },
+    {
+      sequelize,
+      modelName: "BorrowRecord",
+    }
+  );
+
+  return BorrowRecord;
+};
+
+
+5️⃣ Run Migrations
+Now, migrate the updated database schema:
+npx sequelize-cli db:migrate
+
+
+6️⃣ Seed Users
+Create a new user seeder:
+npx sequelize-cli seed:generate --name seedUsers
+
+
+This will create a new file in seeders/ (e.g., seeders/20250318-seedUsers.js).
+
+Edit the file to add sample users:
+"use strict";
+
+module.exports = {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.bulkInsert("Users", [
+      {
+        name: "John Doe",
+        email: "john.doe@example.com",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        name: "Jane Smith",
+        email: "jane.smith@example.com",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+  },
+
+  async down(queryInterface, Sequelize) {
+    await queryInterface.bulkDelete("Users", null, {});
+  },
+};
+
+
+Run the seeder:
+npx sequelize-cli db:seed:all
+
+
+🔟 Test All Endpoints
+📘 Users Management
+
+Action	Method	Endpoint	Payload (Example)
+Get all users	GET	/api/users	-
+Get a user	GET	/api/users/1	-
+Add a user	POST	/api/users	{ "name": "Alice", "email": "alice@example.com" }
+Update a user	PUT	/api/users/1	{ "name": "Updated Name" }
+Delete a user	DELETE	/api/users/1	-
+
+
+once we borrow a book we can \
+🟡 Step 4: Manually Override Due Date in Database
+Since we cannot directly modify the due date via API, we will manually update the due date in the database.
+
+4️⃣ SQL Query (Run in PostgreSQL)
+UPDATE "BorrowRecords" 
+SET "dueDate" = '2024-03-01', "borrowedAt" = '2024-02-15' 
+WHERE "bookId" = 10 AND "userId" = 1;
