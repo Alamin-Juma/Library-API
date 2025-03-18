@@ -4,14 +4,14 @@ import { Book } from "./Book";
 @Entity("authors")
 export class Author {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column({ nullable: true })
-  bio: string;
+  bio!: string;
 
   @ManyToMany(() => Book, (book) => book.authors)
-  books: Book[];
+  books!: Book[];
 }

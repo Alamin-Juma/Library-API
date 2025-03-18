@@ -13,10 +13,12 @@ export const getAllUsers = async (req: Request, res: Response) => {
       relations: ["role"],
       select: ["id", "name", "email"]
     });
-    return res.status(200).json(users);
+     res.status(200).json(users);
+     return
   } catch (error) {
     console.error("Error fetching users:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -30,13 +32,16 @@ export const getUserById = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+       res.status(404).json({ message: "User not found" });
+       return
     }
 
-    return res.status(200).json(user);
+     res.status(200).json(user);
+     return
   } catch (error) {
     console.error("Error fetching user:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -47,13 +52,15 @@ export const createUser = async (req: Request, res: Response) => {
     // Check if user already exists
     const existingUser = await userRepository.findOne({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+       res.status(400).json({ message: "User already exists" });
+       return
     }
 
     // Check if role exists
     const role = await roleRepository.findOne({ where: { id: roleId } });
     if (!role) {
-      return res.status(400).json({ message: "Role not found" });
+       res.status(400).json({ message: "Role not found" });
+       return
     }
 
     // Hash password
@@ -69,7 +76,7 @@ export const createUser = async (req: Request, res: Response) => {
 
     await userRepository.save(newUser);
 
-    return res.status(201).json({
+     res.status(201).json({
       message: "User created successfully",
       user: {
         id: newUser.id,
@@ -78,9 +85,11 @@ export const createUser = async (req: Request, res: Response) => {
         role: role.role_name
       }
     });
+    return
   } catch (error) {
     console.error("Error creating user:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -94,7 +103,8 @@ export const updateUser = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+       res.status(404).json({ message: "User not found" });
+       return
     }
 
     // Update fields if provided
@@ -103,7 +113,8 @@ export const updateUser = async (req: Request, res: Response) => {
     if (email && email !== user.email) {
       const existingUser = await userRepository.findOne({ where: { email } });
       if (existingUser && existingUser.id !== parseInt(id)) {
-        return res.status(400).json({ message: "Email already in use" });
+         res.status(400).json({ message: "Email already in use" });
+         return
       }
       user.email = email;
     }
@@ -115,14 +126,15 @@ export const updateUser = async (req: Request, res: Response) => {
     if (roleId) {
       const role = await roleRepository.findOne({ where: { id: roleId } });
       if (!role) {
-        return res.status(400).json({ message: "Role not found" });
+         res.status(400).json({ message: "Role not found" });
+         return
       }
       user.role = role;
     }
 
     await userRepository.save(user);
 
-    return res.status(200).json({
+     res.status(200).json({
       message: "User updated successfully",
       user: {
         id: user.id,
@@ -130,9 +142,11 @@ export const updateUser = async (req: Request, res: Response) => {
         email: user.email
       }
     });
+    return
   } catch (error) {
     console.error("Error updating user:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -147,18 +161,22 @@ export const deleteUser = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+       res.status(404).json({ message: "User not found" });
+       return
     }
 
     const hasActiveBorrowings = user.borrowRecords.some(record => !record.return_date);
     if (hasActiveBorrowings) {
-      return res.status(400).json({ message: "Cannot delete user with active borrowings" });
+       res.status(400).json({ message: "Cannot delete user with active borrowings" });
+       return
     }
 
     await userRepository.delete(id);
-    return res.status(200).json({ message: "User deleted successfully" });
+     res.status(200).json({ message: "User deleted successfully" });
+     return
   } catch (error) {
     console.error("Error deleting user:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };

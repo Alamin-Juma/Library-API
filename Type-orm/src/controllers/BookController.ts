@@ -32,15 +32,17 @@ export const getAllBooks = async (req: Request, res: Response) => {
       .take(limit)
       .getManyAndCount();
 
-    return res.status(200).json({
+     res.status(200).json({
       books,
       totalPages: Math.ceil(total / limit),
       currentPage: page,
       totalBooks: total
     });
+    return
   } catch (error) {
     console.error("Error fetching books:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -53,13 +55,16 @@ export const getBookById = async (req: Request, res: Response) => {
     });
 
     if (!book) {
-      return res.status(404).json({ message: "Book not found" });
+       res.status(404).json({ message: "Book not found" });
+       return
     }
 
-    return res.status(200).json(book);
+     res.status(200).json(book);
+     return
   } catch (error) {
     console.error("Error fetching book:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -70,7 +75,8 @@ export const createBook = async (req: Request, res: Response) => {
     // Check if book already exists
     const existingBook = await bookRepository.findOne({ where: { isbn } });
     if (existingBook) {
-      return res.status(400).json({ message: "A book with this ISBN already exists" });
+       res.status(400).json({ message: "A book with this ISBN already exists" });
+       return
     }
 
     const bookAuthors: Author[] = [];
@@ -125,13 +131,15 @@ export const createBook = async (req: Request, res: Response) => {
       await bookCopyRepository.save(bookCopy);
     }
 
-    return res.status(201).json({
+     res.status(201).json({
       message: "Book created successfully",
       book: savedBook
     });
+    return
   } catch (error) {
     console.error("Error creating book:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -146,7 +154,8 @@ export const updateBook = async (req: Request, res: Response) => {
     });
 
     if (!book) {
-      return res.status(404).json({ message: "Book not found" });
+       res.status(404).json({ message: "Book not found" });
+       return
     }
 
     // Check if book is currently borrowed
@@ -158,7 +167,8 @@ export const updateBook = async (req: Request, res: Response) => {
     });
 
     if (borrowedCopiesCount > 0) {
-      return res.status(400).json({ message: "Cannot update a book that is currently borrowed" });
+       res.status(400).json({ message: "Cannot update a book that is currently borrowed" });
+       return
     }
 
     // Update book data
@@ -166,7 +176,8 @@ export const updateBook = async (req: Request, res: Response) => {
     if (isbn && isbn !== book.isbn) {
       const existingBook = await bookRepository.findOne({ where: { isbn } });
       if (existingBook && existingBook.id !== parseInt(id)) {
-        return res.status(400).json({ message: "A book with this ISBN already exists" });
+         res.status(400).json({ message: "A book with this ISBN already exists" });
+         return
       }
       book.isbn = isbn;
     }
@@ -204,13 +215,15 @@ export const updateBook = async (req: Request, res: Response) => {
 
     await bookRepository.save(book);
 
-    return res.status(200).json({
+     res.status(200).json({
       message: "Book updated successfully",
       book
     });
+    return
   } catch (error) {
     console.error("Error updating book:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -224,7 +237,8 @@ export const deleteBook = async (req: Request, res: Response) => {
     });
 
     if (!book) {
-      return res.status(404).json({ message: "Book not found" });
+       res.status(404).json({ message: "Book not found" });
+       return
     }
 
     // Check if any copies are currently borrowed
@@ -236,7 +250,8 @@ export const deleteBook = async (req: Request, res: Response) => {
     });
 
     if (borrowedCopiesCount > 0) {
-      return res.status(400).json({ message: "Cannot delete a book that is currently borrowed" });
+       res.status(400).json({ message: "Cannot delete a book that is currently borrowed" });
+       return
     }
 
     // Delete all copies first
@@ -245,9 +260,11 @@ export const deleteBook = async (req: Request, res: Response) => {
     // Then delete the book
     await bookRepository.delete(id);
 
-    return res.status(200).json({ message: "Book deleted successfully" });
+     res.status(200).json({ message: "Book deleted successfully" });
+     return
   } catch (error) {
     console.error("Error deleting book:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };

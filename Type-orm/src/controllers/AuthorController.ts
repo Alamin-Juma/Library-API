@@ -9,10 +9,12 @@ export const getAllAuthors = async (req: Request, res: Response) => {
     const authors = await authorRepository.find({
       relations: ["books"]
     });
-    return res.status(200).json(authors);
+     res.status(200).json(authors);
+     return
   } catch (error) {
     console.error("Error fetching authors:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -25,13 +27,16 @@ export const getAuthorById = async (req: Request, res: Response) => {
     });
 
     if (!author) {
-      return res.status(404).json({ message: "Author not found" });
+       res.status(404).json({ message: "Author not found" });
+       return
     }
 
-    return res.status(200).json(author);
+     res.status(200).json(author);
+     return
   } catch (error) {
     console.error("Error fetching author:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -42,7 +47,8 @@ export const createAuthor = async (req: Request, res: Response) => {
     // Check if author already exists
     const existingAuthor = await authorRepository.findOne({ where: { name } });
     if (existingAuthor) {
-      return res.status(400).json({ message: "Author already exists" });
+       res.status(400).json({ message: "Author already exists" });
+       return
     }
 
     const author = authorRepository.create({
@@ -51,13 +57,15 @@ export const createAuthor = async (req: Request, res: Response) => {
     });
 
     await authorRepository.save(author);
-    return res.status(201).json({
+     res.status(201).json({
       message: "Author created successfully",
       author
     });
+    return
   } catch (error) {
     console.error("Error creating author:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -68,20 +76,23 @@ export const updateAuthor = async (req: Request, res: Response) => {
 
     const author = await authorRepository.findOne({ where: { id: parseInt(id) } });
     if (!author) {
-      return res.status(404).json({ message: "Author not found" });
+       res.status(404).json({ message: "Author not found" });
+       return
     }
 
     if (name) author.name = name;
     if (bio !== undefined) author.bio = bio;
 
     await authorRepository.save(author);
-    return res.status(200).json({
+     res.status(200).json({
       message: "Author updated successfully",
       author
     });
+    return
   } catch (error) {
     console.error("Error updating author:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -95,17 +106,21 @@ export const deleteAuthor = async (req: Request, res: Response) => {
     });
 
     if (!author) {
-      return res.status(404).json({ message: "Author not found" });
+       res.status(404).json({ message: "Author not found" });
+       return
     }
 
     if (author.books && author.books.length > 0) {
-      return res.status(400).json({ message: "Cannot delete author with associated books" });
+       res.status(400).json({ message: "Cannot delete author with associated books" });
+       return
     }
 
     await authorRepository.delete(id);
-    return res.status(200).json({ message: "Author deleted successfully" });
+     res.status(200).json({ message: "Author deleted successfully" });
+     return
   } catch (error) {
     console.error("Error deleting author:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };

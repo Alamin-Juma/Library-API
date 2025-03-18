@@ -5,22 +5,22 @@ import { BookCopy } from "./BookCopy";
 @Entity("borrowers")
 export class Borrower {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @ManyToOne(() => User, (user) => user.borrowRecords)
   @JoinColumn({ name: "user_id" })
-  user: User;
+  user!: User;
 
   @ManyToOne(() => BookCopy, (copy) => copy.borrowRecords)
   @JoinColumn({ name: "copy_id" })
-  copy: BookCopy;
+  copy!: BookCopy;
 
   @Column({ type: "date" })
-  borrow_date: Date;
+  borrow_date!: Date;
 
   @Column({ type: "date" })
-  due_date: Date;
+  due_date!: Date;
 
   @Column({ type: "date", nullable: true })
-  return_date: Date | null;
+  return_date!: Date | null;
 }

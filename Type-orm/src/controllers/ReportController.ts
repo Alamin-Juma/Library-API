@@ -28,10 +28,12 @@ export const getOverdueBooks = async (req: Request, res: Response) => {
       };
     });
 
-    return res.status(200).json(overdueWithDays);
+     res.status(200).json(overdueWithDays);
+     return
   } catch (error) {
     console.error("Error fetching overdue books:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -84,7 +86,7 @@ export const getBorrowingStatistics = async (req: Request, res: Response) => {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
     
-    return res.status(200).json({
+     res.status(200).json({
       totalBorrowings,
       returnedBorrowings,
       overdueBorrowings,
@@ -92,8 +94,10 @@ export const getBorrowingStatistics = async (req: Request, res: Response) => {
       overdueRate: totalBorrowings ? (overdueBorrowings / totalBorrowings) * 100 : 0,
       mostBorrowedBooks
     });
+    return
   } catch (error) {
     console.error("Error generating statistics:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };

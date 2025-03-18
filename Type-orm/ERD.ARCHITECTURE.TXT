@@ -168,3 +168,9 @@ POST /api/borrowings/borrow: Borrow a book (requires member/admin role)
 POST /api/borrowings/return/:borrowId: Return a book (requires librarian/admin role)
 GET /api/borrowings/user/:userId: Get borrowing history for user
 GET /api/borrowings/active: Get all active borrowings (requires librarian
+
+# Generate a new migration (if needed)
+npm run migration:generate --name initialSchema
+
+# Run all migrations
+npm run migration:run

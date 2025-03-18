@@ -5,28 +5,28 @@ import { Author } from "./Author";
 @Entity("books")
 export class Book {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  title: string;
+  title!: string;
 
   @Column({ unique: true })
-  isbn: string;
+  isbn!: string;
 
   @Column()
-  publication_year: number;
+  publication_year!: number;
 
   @Column({ type: "decimal", precision: 3, scale: 2, nullable: true })
-  average_rating: number;
+  average_rating!: number;
 
   @Column({ nullable: true })
-  image_url: string;
+  image_url!: string;
 
   @Column()
-  books_count: number;
+  books_count!: number;
 
   @OneToMany(() => BookCopy, (copy) => copy.book)
-  copies: BookCopy[];
+  copies!: BookCopy[];
 
   @ManyToMany(() => Author, (author) => author.books)
   @JoinTable({
@@ -40,5 +40,5 @@ export class Book {
       referencedColumnName: "id",
     },
   })
-  authors: Author[];
+  authors!: Author[];
 }

@@ -15,12 +15,14 @@ export const register = async (req: Request, res: Response) => {
 
     const existingUser = await userRepository.findOne({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+       res.status(400).json({ message: "User already exists" });
+       return
     }
 
     const role = await roleRepository.findOne({ where: { id: roleId } });
     if (!role) {
-      return res.status(400).json({ message: "Invalid role specified" });
+       res.status(400).json({ message: "Invalid role specified" });
+       return
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -34,10 +36,12 @@ export const register = async (req: Request, res: Response) => {
 
     await userRepository.save(newUser);
 
-    return res.status(201).json({ message: "User registered successfully" });
+     res.status(201).json({ message: "User registered successfully" });
+     return
   } catch (error) {
     console.error("Registration error:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -51,12 +55,14 @@ export const login = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+       res.status(400).json({ message: "Invalid credentials" });
+       return
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(400).json({ message: "Invalid credentials" });
+       res.status(400).json({ message: "Invalid credentials" });
+       return
     }
 
     const payload = {
@@ -71,7 +77,7 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: "1d" }
     );
 
-    return res.status(200).json({
+     res.status(200).json({
       message: "Login successful",
       token,
       user: {
@@ -81,8 +87,10 @@ export const login = async (req: Request, res: Response) => {
         role: user.role.role_name
       }
     });
+    return
   } catch (error) {
     console.error("Login error:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };

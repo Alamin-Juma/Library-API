@@ -4,7 +4,7 @@ import { Borrower } from "../entities/Borrower";
 import { BookCopy } from "../entities/BookCopy";
 import { User } from "../entities/User";
 import { BorrowBookDTO } from "../types";
-import { LessThan } from "typeorm";
+import { IsNull, LessThan } from "typeorm";
 
 const borrowerRepository = AppDataSource.getRepository(Borrower);
 const bookCopyRepository = AppDataSource.getRepository(BookCopy);
@@ -21,11 +21,13 @@ export const borrowBook = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+       res.status(404).json({ message: "User not found" });
+       return
     }
 
     if (!user.role.can_borrow) {
-      return res.status(403).json({ message: "User does not have borrowing privileges" });
+       res.status(403).json({ message: "User does not have borrowing privileges" });
+       return
     }
 
     // Check if book copy exists and is available
@@ -35,11 +37,13 @@ export const borrowBook = async (req: Request, res: Response) => {
     });
 
     if (!bookCopy) {
-      return res.status(404).json({ message: "Book copy not found" });
+       res.status(404).json({ message: "Book copy not found" });
+       return
     }
 
     if (bookCopy.status !== "Available") {
-      return res.status(400).json({ message: "Book copy is not available for borrowing" });
+       res.status(400).json({ message: "Book copy is not available for borrowing" });
+       return
     }
 
     // Calculate due date (default: 14 days from now)
@@ -68,13 +72,15 @@ export const borrowBook = async (req: Request, res: Response) => {
     bookCopy.status = "Borrowed";
     await bookCopyRepository.save(bookCopy);
 
-    return res.status(201).json({
+     res.status(201).json({
       message: "Book borrowed successfully",
       borrowingRecord: borrower
     });
+    return
   } catch (error) {
     console.error("Error borrowing book:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -88,11 +94,13 @@ export const returnBook = async (req: Request, res: Response) => {
     });
 
     if (!borrowRecord) {
-      return res.status(404).json({ message: "Borrowing record not found" });
+       res.status(404).json({ message: "Borrowing record not found" });
+       return
     }
 
     if (borrowRecord.return_date) {
-      return res.status(400).json({ message: "Book already returned" });
+       res.status(400).json({ message: "Book already returned" });
+       return
     }
 
     // Update borrower record
@@ -107,14 +115,16 @@ export const returnBook = async (req: Request, res: Response) => {
     // Check if return is late
     const isLate = borrowRecord.due_date < borrowRecord.return_date;
 
-    return res.status(200).json({
+     res.status(200).json({
       message: "Book returned successfully",
       isLate,
       borrowingRecord: borrowRecord
     });
+    return
   } catch (error) {
     console.error("Error returning book:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
@@ -127,23 +137,27 @@ export const getBorrowingHistory = async (req: Request, res: Response) => {
       relations: ["copy", "copy.book", "copy.book.authors"]
     });
 
-    return res.status(200).json(borrowHistory);
+     res.status(200).json(borrowHistory);
+     return
   } catch (error) {
     console.error("Error fetching borrowing history:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };
 
 export const getActiveBorrowings = async (req: Request, res: Response) => {
   try {
     const activeBorrowings = await borrowerRepository.find({
-      where: { return_date: null },
-      relations: ["user", "copy", "copy.book", "copy.book.authors"]
-    });
+        where: { return_date: IsNull() },
+        relations: ["user", "copy", "copy.book", "copy.book.authors"]
+      });
 
-    return res.status(200).json(activeBorrowings);
+     res.status(200).json(activeBorrowings);
+     return
   } catch (error) {
     console.error("Error fetching active borrowings:", error);
-    return res.status(500).json({ message: "Server error" });
+     res.status(500).json({ message: "Server error" });
+     return
   }
 };

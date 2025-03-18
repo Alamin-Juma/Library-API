@@ -5,21 +5,21 @@ import { Role } from "./Role";
 @Entity("users")
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;  // Use ! to suppress the error
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column({ unique: true })
-  email: string;
+  email!: string;
 
   @Column()
-  password: string;
+  password!: string;
 
   @ManyToOne(() => Role, (role) => role.users)
   @JoinColumn({ name: "role_id" })
-  role: Role;
+  role!: Role;
 
   @OneToMany(() => Borrower, (borrower) => borrower.user)
-  borrowRecords: Borrower[];
+  borrowRecords!: Borrower[];
 }

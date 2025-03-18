@@ -4,20 +4,20 @@ import { User } from "./User";
 @Entity("roles")
 export class Role {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ unique: true })
-  role_name: string;
+  role_name!: string;
 
   @Column()
-  can_borrow: boolean;
+  can_borrow!: boolean;
 
   @Column()
-  can_manage: boolean;
+  can_manage!: boolean;
 
   @Column()
-  is_admin: boolean;
+  is_admin!: boolean;
 
   @OneToMany(() => User, (user) => user.role)
-  users: User[];
+  users!: User[];
 }
