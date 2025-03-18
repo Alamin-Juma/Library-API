@@ -1,0 +1,311 @@
+C:\dev\sides\Library-Mnagement-Sequalize\
+├── src
+│   ├── config
+│   │   └── config.json
+│   ├── models
+│   │   ├── book.js
+│   │   ├── author.js
+│   │   ├── user.js
+│   │   └── index.js
+│   ├── seeders
+│   │   └── seedBooks.js
+│   ├── controllers
+│   │   └── bookController.js
+│   ├── routes
+│   │   └── bookRoutes.js
+│   └── server.js
+├── .sequelizerc
+├── package.json
+└── README.md
+
+Here’s a step-by-step guide to creating and running a seeder in your project, starting from initializing Sequelize to running the seeder script. This guide assumes you’re using a custom project structure (e.g., src/models, src/seeders, etc.) and PostgreSQL as your database.
+
+Step 1: Initialize Sequelize
+Install Sequelize CLI:
+If you haven’t already installed Sequelize CLI, run:
+
+
+npm install sequelize-cli
+Initialize Sequelize:
+Run the following command to initialize Sequelize in your project:
+
+
+npx sequelize-cli init
+This will create the following folders and files:
+
+Copy
+.
+├── config
+│   └── config.json
+├── migrations
+├── models
+│   └── index.js
+├── seeders
+└── .sequelizerc
+Step 2: Update config/config.json
+Open the config/config.json file and update it with your PostgreSQL database credentials. For example:
+
+
+{
+  "development": {
+    "username": "postgres",
+    "password": "QWEiop5991",
+    "database": "library_dev",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "postgres",
+    "password": "QWEiop5991",
+    "database": "library_test",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "postgres",
+    "password": "QWEiop5991",
+    "database": "library_prod",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
+Ensure your PostgreSQL server is running and the database (library_dev) exists. If it doesn’t, create it:
+
+
+createdb library_dev
+Step 3: Update .sequelizerc for Custom Structure
+If you’re using a custom project structure (e.g., src/models, src/seeders, etc.), you need to tell Sequelize where to find your models, migrations, and seeders.
+
+Create or update the .sequelizerc file in your project root:
+
+
+const path = require("path");
+
+module.exports = {
+  config: path.resolve("config", "config.json"),
+  "models-path": path.resolve("src", "models"),
+  "seeders-path": path.resolve("src", "seeders"),
+  "migrations-path": path.resolve("src", "migrations"),
+};
+Move your models, migrations, and seeders to the appropriate folders (src/models, src/migrations, src/seeders).
+
+Step 4: Create the Seeder Script
+Install axios:
+Install axios to fetch the JSON data from the URL:
+
+
+npm install axios
+Create the Seeder File:
+Create a new file in the src/seeders folder, e.g., seedBooks.js.
+
+Add the following code to seedBooks.js:
+
+
+"use strict";
+const axios = require("axios");
+const { Book, Author } = require("../models");
+
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    try {
+      // Fetch the JSON data from the URL
+      const response = await axios.get(
+        "https://raw.githubusercontent.com/rapidtechinsights/hr-assignment/refs/heads/main/books.json"
+      );
+      const booksData = response.data;
+
+      // Loop through the books data and insert into the database
+      for (const book of booksData) {
+        // Create or find authors
+        const authorNames = book.authors.split(", ");
+        const authors = await Promise.all(
+          authorNames.map((name) =>
+            Author.findOrCreate({ where: { name }, defaults: { name } })
+          )
+        );
+
+        // Create the book
+        const createdBook = await Book.create({
+          title: book.title,
+          isbn: book.isbn,
+          publicationYear: book.publication_year,
+          image: book.image_url,
+          rating: book.average_rating,
+          copies: book.books_count,
+        });
+
+        // Link the book to its authors
+        await createdBook.setAuthors(authors.map((author) => author[0]));
+      }
+
+      console.log("Books seeded successfully!");
+    } catch (error) {
+      console.error("Error seeding books:", error);
+    }
+  },
+
+  down: async (queryInterface, Sequelize) => {
+    // Remove all books and authors (optional, for rollback)
+    await Book.destroy({ where: {} });
+    await Author.destroy({ where: {} });
+    console.log("Books and authors removed.");
+  },
+};
+Step 5: Add a Seeder Script to package.json
+Open package.json and add a script to run the seeder:
+
+
+{
+  "scripts": {
+    "seed": "npx sequelize-cli db:seed:all"
+  }
+}
+Step 6: Run the Seeder
+Run the seeder script:
+
+
+npm run seed
+If everything is set up correctly, you should see the following output:
+
+
+Sequelize CLI [Node: 20.17.0, CLI: 6.6.2, ORM: 6.37.6]
+
+Loaded configuration file "config/config.json".
+Using environment "development".
+== 20231010123456-seedBooks: migrating =======
+Books seeded successfully!
+== 20231010123456-seedBooks: migrated (0.123s)
+Step 7: Verify the Data
+Use a PostgreSQL client (e.g., psql, pgAdmin, or a GUI tool) to verify that the data has been inserted into the Books and Authors tables.
+
+
+SELECT * FROM "Books";
+SELECT * FROM "Authors";
+SELECT * FROM "BookAuthors";
+You should see the books and authors from the JSON file in your database.
+
+Step 8: Run the Server
+Start your Express server:
+
+
+npm start
+Test the API endpoints (e.g., GET /api/books) to ensure the seeded data is accessible.
+
+Troubleshooting
+Database Connection Issues:
+
+Ensure your PostgreSQL server is running.
+
+Verify the database credentials in config/config.json.
+
+Missing Dependencies:
+
+Ensure you have installed sequelize, pg (PostgreSQL driver), and sequelize-cli.
+
+
+npm install sequelize pg sequelize-cli
+Incorrect File Paths:
+
+Double-check the paths in .sequelizerc to ensure they match your project structure.
+
+
+How to generate any new modesl 
+
+✅ 2️⃣ Generate the Author Model Inside src/models
+Now that Sequelize knows where to generate models, run:
+npx sequelize-cli model:generate --name Author --attributes name:string
+🚀 This will create:
+
+src/models/author.js ✅
+src/migrations/[timestamp]-create-author.js ✅
+
+
+✅ 5️⃣ Run Migrations
+Now, create the authors table by running:
+npx sequelize-cli db:migrate
+
+
+✅ How to Ensure the books Table Exists
+You must run migrations before seeding.
+
+1️⃣ If you haven’t created the books model yet, run:
+npx sequelize-cli model:generate --name Book --attributes title:string,isbn:string,publicationYear:integer,image:string,rating:float,copies:integer
+
+ensuring an association between table is very important
+Your generated Book model is missing the association definition with Author. Since you have a many-to-many relationship between Books and Authors, you need to explicitly define the association in the associate() method.
+🔧 Fix Your Book Model
+Modify Book.associate(models) inside src/models/book.js to define the relationship:
+
+✅ 📄 src/models/book.js
+"use strict";
+const { Model } = require("sequelize");
+
+module.exports = (sequelize, DataTypes) => {
+  class Book extends Model {
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
+    static associate(models) {
+      // Define many-to-many association with Authors
+      Book.belongsToMany(models.Author, { through: "BookAuthors", foreignKey: "bookId" });
+    }
+  }
+
+  Book.init(
+    {
+      title: DataTypes.STRING,
+      isbn: DataTypes.STRING,
+      publicationYear: DataTypes.INTEGER,
+      image: DataTypes.STRING,
+      rating: DataTypes.FLOAT,
+      copies: DataTypes.INTEGER,
+    },
+    {
+      sequelize,
+      modelName: "Book",
+    }
+  );
+
+  return Book;
+};
+
+
+
+🔧 Fix Your Author Model
+Your Author model must also define the relationship with Book.
+
+✅ 📄 src/models/author.js
+
+"use strict";
+const { Model } = require("sequelize");
+
+module.exports = (sequelize, DataTypes) => {
+  class Author extends Model {
+    static associate(models) {
+      // Define many-to-many association with Books
+      Author.belongsToMany(models.Book, { through: "BookAuthors", foreignKey: "authorId" });
+    }
+  }
+
+  Author.init(
+    {
+      name: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: "Author",
+    }
+  );
+
+  return Author;
+};
+
+
+🛠 Step 3: Create a Join Table (BookAuthors)
+Your Books and Authors are related via a junction table called "BookAuthors".
+Run this command to generate the BookAuthors model:
+npx sequelize-cli model:generate --name BookAuthors --attributes bookId:integer,authorId:integer
+
+npx sequelize-cli db:migrate
