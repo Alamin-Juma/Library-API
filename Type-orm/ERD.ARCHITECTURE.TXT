@@ -1,0 +1,170 @@
+Detailed Explanation of the Enhanced Library System Schema
+Initial Schema Design
+The initial library system schema was designed to support core library management functions based on the requirements in the original ERD and functional specifications. Here's a detailed explanation of each component:
+1. Books Table
+
+book_id (PK): Unique identifier for each book title in the library
+title: The title of the book
+isbn: International Standard Book Number, unique identifier for published books
+authors: In the initial schema, this was a single field containing all author names
+publication_year: The year the book was published
+average_rating: Numerical rating of the book (typically on a scale like 1-5)
+image_url: URL to the book's cover image for display purposes
+books_count: Total number of copies the library owns of this book
+
+This table stores the metadata about each unique book title in the library collection.
+2. BookCopies Table
+
+copy_id (PK): Unique identifier for each physical copy of a book
+book_id (FK): Reference to the book this copy represents
+inventory_number: Physical tracking number for the specific copy
+condition: Current condition of the book (e.g., new, good, fair, poor)
+status: Current availability status using a CHECK constraint (e.g., Available, Borrowed)
+
+This table represents the individual physical copies of books that can be borrowed. A single book title (in the Books table) may have multiple copies (rows in this table).
+3. Users Table
+
+user_id (PK): Unique identifier for each user
+name: User's full name
+email: User's email address (with UNIQUE constraint to prevent duplicates)
+password_hash: Securely stored password hash (not plaintext)
+role: User's role in the system (e.g., Admin, Member)
+
+This table stores information about all users who can borrow books or administer the system.
+4. Borrowers Table
+
+borrower_id (PK): Unique identifier for each borrowing transaction
+user_id (FK): Reference to the user who borrowed the book
+copy_id (FK): Reference to the specific copy of the book that was borrowed
+borrow_date: The date when the book was checked out
+due_date: The date by which the book should be returned
+return_date: The actual date the book was returned (NULL if not yet returned)
+status: Current status of the borrowing transaction (e.g., Borrowed, Returned, Overdue)
+
+This table tracks all borrowing transactions, including currently borrowed books and borrowing history.
+Enhanced Schema (With Normalized Authors)
+The enhanced schema includes all the components of the initial schema but adds proper normalization for handling multiple authors per book:
+5. Authors Table (New)
+
+author_id (PK): Unique identifier for each author
+name: Author's full name
+bio: Biographical information about the author
+
+This table stores information about all authors independently of their books.
+6. BookAuthors Junction Table (New)
+
+book_id (PK, FK): Part of a composite primary key, references the Books table
+author_id (PK, FK): Part of a composite primary key, references the Authors table
+author_order: Integer indicating the order of authors for a book
+
+This junction table establishes a many-to-many relationship between books and authors, allowing each book to have multiple authors and each author to have multiple books.
+Key Relationships
+
+Books to BookCopies: One-to-many relationship. Each book can have multiple physical copies.
+Books to BookAuthors: One-to-many relationship. Each book can be associated with multiple entries in the BookAuthors table.
+Authors to BookAuthors: One-to-many relationship. Each author can be associated with multiple entries in the BookAuthors table.
+Users to Borrowers: One-to-many relationship. Each user can have multiple borrowing transactions.
+BookCopies to Borrowers: One-to-many relationship. Each book copy can be involved in multiple borrowing transactions over time (though only one active borrowing at a time).
+
+Improvements from Original ERD
+
+Removed unnecessary elements:
+
+Eliminated the librarian_id field from the Borrowers table
+Simplified the User_Role relationship into a single role field
+Removed redundant indexes to improve performance
+
+
+Normalized the schema:
+
+Created separate Authors and BookAuthors tables to handle multiple authors per book
+This eliminates data redundancy and improves data integrity
+
+
+Aligned with functional requirements:
+
+Added fields required by the specifications (ISBN, rating, image)
+Ensured proper support for all required features (book management, borrowing/returning, reporting)
+
+
+
+Benefits of the Enhanced Schema
+
+Improved data integrity: Changes to author information only need to be made in one place.
+Elimination of redundancy: Author information is stored only once, regardless of how many books they've written.
+Better flexibility: The system can handle books with any number of authors and authors with any number of books.
+Enhanced search capabilities: Users can more efficiently search for books by author.
+Support for author-specific features: The system can be extended to include author-specific functionality.
+Proper representation of author order: For books with multiple authors, the order can be preserved.
+
+This enhanced schema provides a robust foundation for the library management system while maintaining all the functionality required by the specifications and improving data organization and integrity.
+
+
+library-management-typeorm/
+├── src/
+│   ├── config/
+│   │   └── ormconfig.ts
+│   ├── controllers/
+│   │   ├── AuthController.ts
+│   │   ├── BookController.ts
+│   │   ├── AuthorController.ts
+│   │   ├── BorrowingController.ts
+│   │   ├── UserController.ts
+│   │   └── ReportController.ts
+│   ├── entities/
+│   │   ├── User.ts
+│   │   ├── Role.ts
+│   │   ├── Book.ts
+│   │   ├── BookCopy.ts
+│   │   ├── Author.ts
+│   │   └── Borrower.ts
+│   ├── middleware/
+│   │   ├── auth.ts
+│   │   └── roleCheck.ts
+│   ├── routes/
+│   │   ├── authRoutes.ts
+│   │   ├── bookRoutes.ts
+│   │   ├── authorRoutes.ts
+│   │   ├── borrowingRoutes.ts
+│   │   ├── userRoutes.ts
+│   │   └── reportRoutes.ts
+│   ├── services/
+│   │   ├── BookService.ts
+│   │   ├── UserService.ts
+│   │   └── BorrowingService.ts
+│   ├── utils/
+│   │   └── helpers.ts
+│   ├── migrations/
+│   │   └── initialMigration.ts
+│   ├── types/
+│   │   └── index.ts
+│   └── server.ts
+├── .env
+├── tsconfig.json
+├── package.json
+└── nodemon.json
+*/
+
+
+Books
+
+GET /api/books: Get all books
+GET /api/books/:id: Get book by ID
+POST /api/books: Create new book (requires admin/librarian role)
+PUT /api/books/:id: Update book (requires admin/librarian role)
+DELETE /api/books/:id: Delete book (requires admin/librarian role)
+
+Authors
+
+GET /api/authors: Get all authors
+GET /api/authors/:id: Get author by ID
+POST /api/authors: Create new author (requires admin/librarian role)
+PUT /api/authors/:id: Update author (requires admin/librarian role)
+DELETE /api/authors/:id: Delete author (requires admin/librarian role)
+
+Borrowings
+
+POST /api/borrowings/borrow: Borrow a book (requires member/admin role)
+POST /api/borrowings/return/:borrowId: Return a book (requires librarian/admin role)
+GET /api/borrowings/user/:userId: Get borrowing history for user
+GET /api/borrowings/active: Get all active borrowings (requires librarian
