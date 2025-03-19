@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../config/ormconfig";
+import  AppDataSource from "../../ormconfig";
 import { Borrower } from "../entities/Borrower";
 import { IsNull, LessThan } from "typeorm";
 

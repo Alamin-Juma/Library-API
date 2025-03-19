@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../config/ormconfig";
+import  AppDataSource  from "../../ormconfig";
 import { Author } from "../entities/Author";
 
 const authorRepository = AppDataSource.getRepository(Author);

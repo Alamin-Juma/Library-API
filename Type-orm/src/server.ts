@@ -3,7 +3,7 @@ import "reflect-metadata";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { AppDataSource } from "./config/ormconfig";
+import AppDataSource from "../ormconfig";
 
 // Import routes
 import authRoutes from "./routes/authRoutes";
@@ -27,12 +27,12 @@ app.use(cookieParser());
 app.use(cors());
 
 // Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/books", bookRoutes);
-app.use("/api/authors", authorRoutes);
-app.use("/api/borrowings", borrowingRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/reports", reportRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/books", bookRoutes);
+app.use("/api/v1/authors", authorRoutes);
+app.use("/api/v1/borrowings", borrowingRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/reports", reportRoutes);
 
 // Health check route
 app.get("/health", (req, res) => {

@@ -1,4 +1,4 @@
-import { AppDataSource } from "./config/ormconfig";
+import AppDataSource from "../ormconfig";
 import { Role } from "./entities/Role";
 import { User } from "./entities/User";
 import { Author } from "./entities/Author";
@@ -81,7 +81,7 @@ async function seedDatabase() {
 
       // Ensure authors exist
       const authorEntities = await Promise.all(
-        authors.split(", ").map(async (authorName: string) => {
+        authors.split(", ").map(async (authorName) => {
           let author = await authorRepository.findOne({ where: { name: authorName } });
           if (!author) {
             author = authorRepository.create({ name: authorName, bio: "No bio available" });

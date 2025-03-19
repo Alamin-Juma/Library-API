@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../config/ormconfig";
+import AppDataSource  from "../../ormconfig";
 import { Book } from "../entities/Book";
 import { Author } from "../entities/Author";
 import { BookCopy } from "../entities/BookCopy";
@@ -68,9 +68,90 @@ export const getBookById = async (req: Request, res: Response) => {
   }
 };
 
+// export const createBook = async (req: Request, res: Response) => {
+//   try {
+//     const { title, isbn, publicationYear, authors, imageUrl, averageRating, copiesCount }: BookCreateDTO = req.body;
+
+//     // Check if book already exists
+//     const existingBook = await bookRepository.findOne({ where: { isbn } });
+//     if (existingBook) {
+//        res.status(400).json({ message: "A book with this ISBN already exists" });
+//        return
+//     }
+
+//     const bookAuthors: Author[] = [];
+
+//     // Process authors (can be ids or new authors)
+//     for (const authorData of authors) {
+//       let author: Author;
+      
+//       if (typeof authorData === 'number') {
+//         // Author ID provided
+//         author = await authorRepository.findOneOrFail({ where: { id: authorData } });
+//       } else if ('id' in authorData) {
+//         // Author object with ID provided
+//         author = await authorRepository.findOneOrFail({ where: { id: authorData.id } });
+//       } else {
+//         // New author name provided
+//         const existingAuthor = await authorRepository.findOne({ where: { name: authorData.name } });
+        
+//         if (existingAuthor) {
+//           author = existingAuthor;
+//         } else {
+//           // Create new author
+//           const newAuthor = authorRepository.create({ name: authorData.name });
+//           author = await authorRepository.save(newAuthor);
+//         }
+//       }
+      
+//       bookAuthors.push(author);
+//     }
+
+//     // Create new book
+//     const newBook = bookRepository.create({
+//       title,
+//       isbn,
+//       publication_year: publicationYear,
+//       image_url: imageUrl,
+//       average_rating: averageRating || null,
+//       books_count: copiesCount,
+//       authors: bookAuthors
+//     });
+
+//     const savedBook = await bookRepository.save(newBook);
+
+//     // Create book copies
+//     for (let i = 1; i <= copiesCount; i++) {
+//       const bookCopy = bookCopyRepository.create({
+//         book: savedBook,
+//         inventory_number: `${savedBook.id}-${i}`,
+//         condition: "New",
+//         status: "Available"
+//       });
+//       await bookCopyRepository.save(bookCopy);
+//     }
+
+//      res.status(201).json({
+//       message: "Book created successfully",
+//       book: savedBook
+//     });
+//     return
+//   } catch (error) {
+//     console.error("Error creating book:", error);
+//      res.status(500).json({ message: "Server error" });
+//      return
+//   }
+// };
+
 export const createBook = async (req: Request, res: Response) => {
   try {
     const { title, isbn, publicationYear, authors, imageUrl, averageRating, copiesCount }: BookCreateDTO = req.body;
+
+    // Validate required fields
+    if (!title || !isbn || !publicationYear || !authors || !copiesCount) {
+       res.status(400).json({ message: "Missing required fields" });
+       return
+    }
 
     // Check if book already exists
     const existingBook = await bookRepository.findOne({ where: { isbn } });
@@ -111,7 +192,7 @@ export const createBook = async (req: Request, res: Response) => {
     const newBook = bookRepository.create({
       title,
       isbn,
-      publication_year: publicationYear,
+      publication_year: publicationYear, // Ensure this is not null
       image_url: imageUrl,
       average_rating: averageRating || null,
       books_count: copiesCount,

@@ -174,3 +174,32 @@ npm run migration:generate --name initialSchema
 
 # Run all migrations
 npm run migration:run
+
+
+post data example
+{
+  "title": "The Great Gatsby",
+  "isbn": "9780743273565",
+  "publicationYear": 1925,
+  "averageRating": 4.2,
+  "imageUrl": "https://example.com/great-gatsby.jpg",
+  "copiesCount": 5,
+  "authors": [
+    {
+      "name": "F. Scott Fitzgerald",
+      "bio": "An American novelist known for The Great Gatsby."
+    }
+  ]
+}
+
+while posting , auth headers to set token on client are required1. Token Might Not Be Sent in the Request
+Ensure that the JWT token is included in the Authorization header in Postman.
+
+✅ In Postman, go to Headers and set:
+Key: Authorization
+Value: Bearer <your-jwt-token>
+
+
+migrations generate : in case of any alter -  npm run typeorm -- migration:generate ./src/migrations/FixPublicationYear -d ormconfig.ts
+run migrations: npm run db:migrate
+

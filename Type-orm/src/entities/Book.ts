@@ -13,8 +13,8 @@ export class Book {
   @Column({ unique: true })
   isbn!: string;
 
-  @Column()
-  publication_year!: number;
+  @Column({ type: "int", nullable: false })  // Ensure it's NOT nullable
+  publication_year: number;  
 
   @Column({ type: "decimal", precision: 3, scale: 2, nullable: true })
   average_rating!: number;
